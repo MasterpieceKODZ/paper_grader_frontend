@@ -1,166 +1,279 @@
 "use client";
 
-import { ChangeEvent, useState } from "react";
+// pages/upload.tsx
+import { useState, useEffect } from "react";
 import axios from "axios";
-import Link from "next/link";
+import { Course } from "@/type/Course";
 
-const UploadFiles = () => {
-	const [files, setFiles] = useState<File[]>([]);
-	const [message, setMessage] = useState<string>("");
-	const [subject, setSubject] = useState<string>("");
-	const [courseCode, setCourseCode] = useState<string>("");
-	const [year, setYear] = useState<string>("");
+async function fetchSavedExamAnswersStudent(course_code: string, date: string) {
+	try {
+		const response = await axios.post("http://localhost:4000/exam-answers", {
+			course_code,
+			date,
+		});
 
-	const [messageType, setMessageType] = useState<"success" | "error">(
-		"success",
+		const svdStu = response.data.map((itm: any) => {
+			return { student_name: itm.student_name, student_id: itm.student_id };
+		});
+		return svdStu;
+	} catch (error) {
+		return [];
+	}
+}
+
+const UploadPage = () => {
+	const [courses, setCourses] = useState<Course[]>([]);
+	const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+	const [examDate, setExamDate] = useState("");
+	const [studentName, setStudentName] = useState("");
+	const [studentId, setStudentId] = useState("");
+	const [objectiveFile, setObjectiveFile] = useState<File>();
+	const [theoryFiles, setTheoryFiles] = useState<FileList>();
+	const [studentsUploaded, setStudentsUploaded] = useState<any[]>([]);
+	const [showPopup, setShowPopup] = useState(false);
+	const [showProceedBtn, setShowProceedBtn] = useState(true);
+	const [message, setMessage] = useState(
+		"are you sure there are no mistakes in the data provided?, close this popup to review or click proceed to continue",
 	);
+	const [loading, setLoading] = useState(false);
 
-	const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-		if (e.target.files) {
-			setFiles(Array.from(e.target.files));
-		}
+	useEffect(() => {
+		axios
+			.get("http://localhost:4000/course")
+			.then((response) => setCourses(response.data))
+			.catch((e) => {
+				setCourses([]);
+			});
+	}, []);
+
+	const handleFileChange = (
+		e: React.ChangeEvent<HTMLInputElement>,
+		setFile: any,
+		isOBJ: boolean,
+	) => {
+		if (isOBJ) setFile(e.target.files![0]);
+		else setFile(e.target.files);
 	};
 
-	const handleGradeMultiChoice = async () => {
-		setMessage("");
+	const resetFileInputs = () => {
+		const objFileInput: any = document.getElementById("obj_files_inp");
+		objFileInput.value = "";
+		const theoryFileInp: any = document.getElementById("theory_files_inp");
+		theoryFileInp.value = "";
+	};
 
-		if (files.length === 0 || !subject || !courseCode || !year) {
-			setMessage("Please fill in all fields and select files to upload.");
+	const handleUpload = async () => {
+		setShowPopup(false);
+		setLoading(true);
+		if (
+			!selectedCourse ||
+			!examDate ||
+			!studentName ||
+			!studentId ||
+			!objectiveFile ||
+			!theoryFiles
+		) {
+			setMessage("Please fill all fields and provide all necessary files.");
+			setShowProceedBtn(false);
+			setLoading(false);
+			setShowPopup(true);
 			return;
 		}
 
 		const formData = new FormData();
-		files.forEach((file) => {
-			formData.append("files", file);
-		});
-		formData.append("subject", subject);
-		formData.append("courseCode", courseCode);
-		formData.append("year", year);
+		formData.append("course_name", selectedCourse.name);
+		formData.append("course_code", selectedCourse.course_code);
+		formData.append("date", examDate);
+		formData.append("student_name", studentName);
+		formData.append("student_id", studentId);
+		formData.append("objective_answers", objectiveFile);
+		Array.from(theoryFiles).forEach((file) =>
+			formData.append("theory_answers", file),
+		);
 
 		try {
-			const response = await axios.post(
-				"http://localhost:4000/upload/multiple-choice",
-				formData,
-				{
-					headers: {
-						"Content-Type": "multipart/form-data",
-					},
+			await axios.post("http://localhost:4000/upload-answers", formData, {
+				headers: {
+					"Content-Type": "multipart/form-data",
 				},
+			});
+			setMessage("Upload successful!");
+			setShowProceedBtn(false);
+			//setStudentsUploaded([...studentsUploaded, { studentName, studentId }]);
+			setStudentId("");
+			setStudentName("");
+			resetFileInputs();
+
+			const savedStudent = await fetchSavedExamAnswersStudent(
+				selectedCourse.course_code,
+				examDate,
 			);
-			setMessageType("success");
-			setMessage("File uploaded successfully(s)!");
-
-			// Handle response as needed
+			setStudentsUploaded(savedStudent);
 		} catch (error) {
-			console.error("Error uploading file(s):", error);
-			setMessage("Failed to upload file(s).");
-		}
-	};
-
-	const handleGradeEssay = async () => {
-		setMessage("");
-
-		if (files.length === 0 || !subject || !courseCode || !year) {
-			setMessage("Please fill in all fields and select files to upload.");
-			return;
-		}
-
-		const formData = new FormData();
-		files.forEach((file) => {
-			formData.append("files", file);
-		});
-		formData.append("subject", subject);
-		formData.append("courseCode", courseCode);
-		formData.append("year", year);
-
-		try {
-			const response = await axios.post(
-				"http://localhost:4000/upload/multiple-choice",
-				formData,
-				{
-					headers: {
-						"Content-Type": "multipart/form-data",
-					},
-				},
-			);
-			setMessageType("success");
-			setMessage("File uploaded successfully(s)!");
-
-			// Handle response as needed
-		} catch (error) {
-			console.error("Error uploading file(s):", error);
-			setMessage("Failed to upload file(s).");
+			setMessage("Upload failed, please try again.");
+			setShowProceedBtn(false);
+		} finally {
+			setLoading(false);
+			setShowPopup(true);
 		}
 	};
 
 	return (
-		<div>
-			<h2 className=" text-center text-gray-500 font-serif text-2xl font-light">
-				Upload Answer Booklets
-			</h2>
-			<form>
-				<input
-					type="text"
-					placeholder="Subject"
-					className=" block mx-auto border-[1px] text-center min-h-8 mt-12 border-gray-300 rounded"
-					value={subject}
-					onChange={(e) => setSubject(e.target.value)}
-					required
-				/>
-				<input
-					type="text"
-					placeholder="Course Code"
-					className=" block mx-auto border-[1px] text-center min-h-8 mt-4 border-gray-300 rounded"
-					value={courseCode}
-					onChange={(e) => setCourseCode(e.target.value)}
-					required
-				/>
-				<input
-					type="text"
-					placeholder="Year"
-					className=" block mx-auto border-[1px] text-center min-h-8 mt-4 border-gray-300 rounded"
-					value={year}
-					onChange={(e) => setYear(e.target.value)}
-					required
-				/>
-				<input
-					type="file"
-					className=" block mx-auto border-[1px] text-center min-h-8 mt-4 border-gray-300 rounded"
-					multiple
-					onChange={handleFileChange}
-					required
-				/>
-				<div
-					onClick={handleGradeMultiChoice}
-					className=" flex items-center justify-center">
-					<button
-						type="button"
-						className=" block mx-auto mt-16 me-10 rounded-lg bg-gray-500 border-2 border-gray-500 text-white font-bold text-center px-10 py-1 hover:bg-white hover:border-gray-500 hover:border-2 hover:text-gray-500">
-						Grade Multiple-Choice
-					</button>
-					<button
-						type="button"
-						onClick={handleGradeEssay}
-						className=" block mx-auto mt-16 ms-10 rounded-lg bg-black border-2 border-black text-white font-bold text-center px-10 py-1 hover:bg-white hover:border-black hover:border-2 hover:text-black">
-						Grade Essay
-					</button>
+		<div className="min-w-[100%]">
+			<div className="p-8 sm:w-[80%] sm:max-w-[650px] block mx-auto">
+				<h1 className="text-2xl font-bold text-center mb-10">
+					Upload Student Answer Papers
+				</h1>
+				<div className="mb-4 mt-4">
+					<label>Course</label>
+					<select
+						value={selectedCourse?.course_code}
+						onChange={(e) => {
+							let selectCourse: Course | null = null;
+
+							for (const crs of courses) {
+								if (crs.course_code == e.target.value) {
+									selectCourse = crs;
+								}
+							}
+
+							setSelectedCourse(selectCourse);
+
+							setTimeout(() => {
+								if (examDate) {
+									fetchSavedExamAnswersStudent(
+										selectCourse!.course_code,
+										examDate,
+									).then((res) => setStudentsUploaded(res));
+								}
+							}, 100);
+						}}
+						className="border p-2 rounded w-full">
+						<option value="">Select a course</option>
+						{courses.map((course: Course) => (
+							<option
+								key={course._id}
+								value={course.course_code}
+								className=" mt-2 font-semibold">
+								{course.course_code}
+							</option>
+						))}
+					</select>
 				</div>
-			</form>
-			<Link
-				href="/results"
-				className=" font-bold text-black block mx-auto mt-14 w-max">
-				Fetch Results
-			</Link>
-			{message && (
-				<p
-					className={` ${
-						messageType == "error" ? "text-red-700" : "text-green-600"
-					} font-mono text-center mt-20 text-sm`}>
-					{message}
-				</p>
-			)}
+				<div className="mb-4">
+					<label>Exam Date</label>
+					<input
+						type="date"
+						value={examDate}
+						onChange={(e) => {
+							// update saved students list
+							if (selectedCourse) {
+								fetchSavedExamAnswersStudent(
+									selectedCourse.course_code,
+									examDate,
+								).then((res) => setStudentsUploaded(res));
+							}
+							setExamDate(e.target.value);
+						}}
+						className="border p-2 rounded w-full"
+					/>
+				</div>
+				<div className="mb-4">
+					<label>Student Name</label>
+					<input
+						type="text"
+						value={studentName}
+						onChange={(e) => setStudentName(e.target.value)}
+						className="border p-2 rounded w-full"
+					/>
+				</div>
+				<div className="mb-4">
+					<label>Student ID</label>
+					<input
+						type="text"
+						value={studentId}
+						onChange={(e) => setStudentId(e.target.value)}
+						className="border p-2 rounded w-full"
+					/>
+				</div>
+				<div className="mb-4">
+					<label>Objective Answer Sheet</label>
+					<input
+						id="obj_files_inp"
+						type="file"
+						onChange={(e) => handleFileChange(e, setObjectiveFile, true)}
+						className="border p-2 rounded w-full"
+					/>
+				</div>
+				<div className="mb-4">
+					<label>Theory Answer Sheets</label>
+					<input
+						id="theory_files_inp"
+						type="file"
+						multiple
+						onChange={(e) => handleFileChange(e, setTheoryFiles, false)}
+						className="border p-2 rounded w-full"
+					/>
+				</div>
+				<button
+					onClick={() => {
+						setShowPopup(true);
+						setShowProceedBtn(true);
+					}}
+					className="bg-blue-500 text-white px-4 py-[2px] rounded">
+					Save
+				</button>
+
+				{showPopup && (
+					<div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+						<div className="bg-white w-[90%] sm:max-w-[80%]  p-4 rounded shadow">
+							<p className=" text-center my-6 font-mono">{message}</p>
+							<button
+								onClick={() => {
+									setMessage(
+										"are you sure there are no mistakes in the data provided?, close this popup to review or click proceed to continue",
+									);
+									setShowProceedBtn(true);
+									setShowPopup(false);
+								}}
+								className="mr-4 ms-3 text-red-600">
+								Close
+							</button>
+							{showProceedBtn && (
+								<button
+									onClick={handleUpload}
+									className="bg-green-500 text-white px-4 py-1 ms-5 rounded">
+									Proceed
+								</button>
+							)}
+						</div>
+					</div>
+				)}
+
+				{loading && (
+					<p className=" my-4 font-mono text-green-500">Loading...</p>
+				)}
+
+				<div className="mt-4">
+					<h2 className="text-xl font-bold mb-2">Uploaded Students</h2>
+					<ul>
+						{studentsUploaded.map((student) => (
+							<li key={student.studentId}>
+								{student.studentName} ({student.studentId})
+							</li>
+						))}
+					</ul>
+				</div>
+				<button
+					onClick={() => {
+						axios.post("http://localhost:4000/grade-exam");
+					}} // Replace with actual function
+					className="bg-red-500 text-white p-2 rounded mt-4">
+					Initiate Grading
+				</button>
+			</div>
 		</div>
 	);
 };
 
-export default UploadFiles;
+export default UploadPage;

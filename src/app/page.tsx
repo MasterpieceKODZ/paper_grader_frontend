@@ -1,11 +1,25 @@
-import UploadFiles from "@/components/upload";
+import Link from "next/link";
 
-export default function Home() {
+const Homepage = () => {
 	return (
-		<main className="min-h-screen w-screen">
-			<div className=" w-screen min-h-max py-5 px-5">
-				<UploadFiles />
-			</div>
-		</main>
+		<div className=" w-[100%] min-h-[80vh] flex justify-center items-center">
+			<Link
+				href="/course/list/view"
+				className=" w-max h-max px-3 py-2 rounded-md font-bold text-white text-center bg-blue-600 mr-5">
+				COURSES
+			</Link>
+			<Link
+				href="/upload"
+				className=" w-max h-max px-3 py-2 rounded-md font-bold text-white text-center bg-blue-600 mr-2 ml-2">
+				UPLOAD ANSWERS
+			</Link>
+			<Link
+				href="/course/list/result"
+				className=" w-max h-max px-3 py-2 rounded-md font-bold text-white text-center bg-blue-600 ml-5">
+				VIEW RESULT
+			</Link>
+		</div>
 	);
-}
+};
+
+export default Homepage;
