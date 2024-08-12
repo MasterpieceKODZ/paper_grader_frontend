@@ -4,10 +4,16 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Course } from "@/type/Course";
+import { useRouter } from "next/navigation";
 
-async function fetchSavedExamAnswersStudent(course_code: string, date: string) {
+async function fetchSavedExamAnswersStudent(
+	school_name: string,
+	course_code: string,
+	date: string,
+) {
 	try {
 		const response = await axios.post("http://localhost:4000/exam-answers", {
+			school_name,
 			course_code,
 			date,
 		});
@@ -37,14 +43,33 @@ const UploadPage = () => {
 	);
 	const [loading, setLoading] = useState(false);
 
-	useEffect(() => {
+	const router = useRouter();
+
+	async function handleInitiateGrading(
+		school_name: string,
+		course_code: string,
+		date: any,
+	) {
+		setMessage("grading in progress...");
+		setShowProceedBtn(false);
+		setLoading(false);
+		setShowPopup(true);
 		axios
-			.get("http://localhost:4000/course")
-			.then((response) => setCourses(response.data))
+			.post("http://localhost:4000/grade-exam", {
+				school_name,
+				course_code,
+				date,
+			})
+			.then((res) => {
+				router.push(`/results/${course_code}`);
+			})
 			.catch((e) => {
-				setCourses([]);
+				setMessage("EXAM GRADING FAILED. ");
+				setShowProceedBtn(false);
+				setLoading(false);
+				setShowPopup(true);
 			});
-	}, []);
+	}
 
 	const handleFileChange = (
 		e: React.ChangeEvent<HTMLInputElement>,
@@ -81,6 +106,7 @@ const UploadPage = () => {
 		}
 
 		const formData = new FormData();
+		formData.append("school_name", selectedCourse.school_name);
 		formData.append("course_name", selectedCourse.name);
 		formData.append("course_code", selectedCourse.course_code);
 		formData.append("date", examDate);
@@ -99,12 +125,13 @@ const UploadPage = () => {
 			});
 			setMessage("Upload successful!");
 			setShowProceedBtn(false);
-			//setStudentsUploaded([...studentsUploaded, { studentName, studentId }]);
+
 			setStudentId("");
 			setStudentName("");
 			resetFileInputs();
 
 			const savedStudent = await fetchSavedExamAnswersStudent(
+				selectedCourse.school_name,
 				selectedCourse.course_code,
 				examDate,
 			);
@@ -117,6 +144,15 @@ const UploadPage = () => {
 			setShowPopup(true);
 		}
 	};
+
+	useEffect(() => {
+		axios
+			.get("http://localhost:4000/course")
+			.then((response) => setCourses(response.data))
+			.catch((e) => {
+				setCourses([]);
+			});
+	}, []);
 
 	return (
 		<div className="min-w-[100%]">
@@ -140,9 +176,10 @@ const UploadPage = () => {
 							setSelectedCourse(selectCourse);
 
 							setTimeout(() => {
-								if (examDate) {
+								if (examDate && selectCourse) {
 									fetchSavedExamAnswersStudent(
-										selectCourse!.course_code,
+										selectCourse.school_name,
+										selectCourse.course_code,
 										examDate,
 									).then((res) => setStudentsUploaded(res));
 								}
@@ -167,13 +204,19 @@ const UploadPage = () => {
 						value={examDate}
 						onChange={(e) => {
 							// update saved students list
-							if (selectedCourse) {
-								fetchSavedExamAnswersStudent(
-									selectedCourse.course_code,
-									examDate,
-								).then((res) => setStudentsUploaded(res));
-							}
+
 							setExamDate(e.target.value);
+							if (selectedCourse?.course_code) {
+								fetchSavedExamAnswersStudent(
+									selectedCourse.school_name,
+									selectedCourse.course_code,
+									e.target.value,
+								).then((res) => {
+									console.log(res);
+
+									setStudentsUploaded(res);
+								});
+							}
 						}}
 						className="border p-2 rounded w-full"
 					/>
@@ -206,7 +249,9 @@ const UploadPage = () => {
 					/>
 				</div>
 				<div className="mb-4">
-					<label>Theory Answer Sheets</label>
+					<label>
+						Theory Answer Sheets <span>1 file per question in order</span>
+					</label>
 					<input
 						id="theory_files_inp"
 						type="file"
@@ -258,15 +303,27 @@ const UploadPage = () => {
 					<h2 className="text-xl font-bold mb-2">Uploaded Students</h2>
 					<ul>
 						{studentsUploaded.map((student) => (
-							<li key={student.studentId}>
-								{student.studentName} ({student.studentId})
+							<li key={student.student_id}>
+								{student.student_name} ({student.student_id})
 							</li>
 						))}
 					</ul>
 				</div>
 				<button
+					type="button"
 					onClick={() => {
-						axios.post("http://localhost:4000/grade-exam");
+						if (selectedCourse != null && examDate != null) {
+							handleInitiateGrading(
+								selectedCourse.school_name,
+								selectedCourse.course_code,
+								examDate,
+							);
+						} else {
+							setMessage("select a course and a date");
+							setShowProceedBtn(false);
+							setLoading(false);
+							setShowPopup(true);
+						}
 					}} // Replace with actual function
 					className="bg-red-500 text-white p-2 rounded mt-4">
 					Initiate Grading

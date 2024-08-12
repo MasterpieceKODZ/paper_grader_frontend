@@ -14,6 +14,7 @@ const AddCourse = () => {
 
 	const handleFormSubmit = async (course: any) => {
 		setLoading(true);
+
 		try {
 			const res = await axios.post(API_URL, course);
 

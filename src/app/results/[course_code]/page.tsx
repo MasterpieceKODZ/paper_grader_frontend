@@ -9,38 +9,36 @@ interface Result {
 	objectiveScore: number;
 	theoryScore: number;
 	totalScore: number;
-	feedback: string;
+	subject: string;
+	courseCode: string;
 }
 
 const Results = ({ params }: { params: { course_code: string } }) => {
 	const [results, setResults] = useState<Result[]>([]);
 	const [loading, setLoading] = useState<boolean>(false);
 	const [error, setError] = useState<string | null>(null);
-	//const [resultsFound, setResultsFound] = useState<boolean>(false);
-	// const [showToast, setShowToast] = useState<boolean>(false);
-	// const [subject, setSubject] = useState<string>("");
-	// const [courseCode, setCourseCode] = useState<string>("");
-	// const [year, setYear] = useState<string>("");
 
 	useEffect(() => {
 		setLoading(true);
 
-		if (results.length < 1) {
-			axios
-				.get("http://localhost:4000/results", {
-					params: { courseCode: params.course_code },
-				})
-				.then((res) => {
-					setResults(res.data);
-				})
-				.catch((error) => {
-					console.error("Error fetching results:", error);
-					setError("Failed to load results. refresh page to try again");
-				})
-				.finally(() => {
-					setLoading(false);
-				});
-		}
+		//if (results.length < 1) {
+		axios
+			.post("http://localhost:4000/results", {
+				courseCode: params.course_code,
+			})
+			.then((res) => {
+				setResults(res.data);
+				setLoading(false);
+			})
+			.catch((error) => {
+				console.error("Error fetching results:", error);
+				setError("Failed to load results. refresh page to try again");
+				setLoading(false);
+			})
+			.finally(() => {
+				setLoading(false);
+			});
+		//}
 	}, []);
 
 	if (loading) {
@@ -61,16 +59,12 @@ const Results = ({ params }: { params: { course_code: string } }) => {
 
 	return (
 		<div>
-			<h2 className=" text-center text-gray-500 font-serif text-2xl font-light">
-				View Results
-			</h2>
-			{/* {showToast && (
-				<p
-					id="toast"
-					className=" text-center mt-4 font-mono text-sm text-red-400">
-					fill all form fields.
-				</p>
-			)} */}
+			{results.length > 0 && (
+				<h2 className=" text-center text-gray-500 font-serif text-2xl font-light">
+					<span>{results[0].subject}</span>
+					<span> - {results[0].courseCode} Results</span>
+				</h2>
+			)}
 
 			{results.length > 0 && (
 				<table className=" block mx-auto w-max mt-14">
@@ -81,7 +75,6 @@ const Results = ({ params }: { params: { course_code: string } }) => {
 							<th className=" px-2">Objective Score</th>
 							<th className=" px-2">Theory Score</th>
 							<th className=" px-2">Total Score</th>
-							<th className=" px-2">Feedback</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -91,8 +84,9 @@ const Results = ({ params }: { params: { course_code: string } }) => {
 								<td className=" px-2">{result.studentName}</td>
 								<td className=" px-2">{result.objectiveScore}</td>
 								<td className=" px-2">{result.theoryScore}</td>
-								<td className=" px-2">{result.totalScore}</td>
-								<td className=" px-2">{result.feedback}</td>
+								<td className=" px-2">
+									{result.theoryScore + result.objectiveScore}
+								</td>
 							</tr>
 						))}
 					</tbody>

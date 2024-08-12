@@ -1,5 +1,6 @@
 export type Course = {
 	_id?: string;
+	school_name: string;
 	name: string;
 	course_code: string;
 	objective_question_and_answer: {
@@ -7,12 +8,10 @@ export type Course = {
 	};
 	theory_question_and_answer: {
 		number: {
-			question: string;
-			rubric: {
-				full_mark: string;
-				half_mark: string;
-				no_mark: string;
-			};
+			question: String;
+			rubric: String;
+			poss_answers: [String];
+			marks: number;
 		};
 	};
 };
