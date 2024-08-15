@@ -5,7 +5,7 @@ import { useState } from "react";
 import CourseForm from "@/components/CourseForm";
 import { useRouter } from "next/navigation";
 
-const AddCourse = () => {
+const AddCourse = ({ params }: { params: { school_id: string } }) => {
 	const [loading, setLoading] = useState(false);
 
 	const API_URL = "http://localhost:4000/course"; // External API URL
@@ -19,7 +19,7 @@ const AddCourse = () => {
 			const res = await axios.post(API_URL, course);
 
 			if (res.statusText == "Created") {
-				router.push("/course/list/view");
+				router.push(`/course/list/${params.school_id}/view`);
 			}
 		} catch (error) {
 			console.error("Error saving course", error);
@@ -33,6 +33,7 @@ const AddCourse = () => {
 				Register Course
 			</h2>
 			<CourseForm
+				schoolId={params.school_id}
 				onSubmit={handleFormSubmit}
 				loading={loading}
 			/>

@@ -10,7 +10,7 @@ export type Course = {
 		number: {
 			question: String;
 			rubric: String;
-			poss_answers: [String];
+			context: [String];
 			marks: number;
 		};
 	};

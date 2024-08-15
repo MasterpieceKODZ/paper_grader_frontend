@@ -26,7 +26,8 @@
 		"**/*.ts",
 		"**/*.tsx",
 		".next/types/**/*.ts",
-		"src/components/CourseForm.jsx"
+		"src/components/CourseForm.jsx",
+		"src/components/upload.tsx"
 	],
 	"exclude": ["node_modules"]
 }

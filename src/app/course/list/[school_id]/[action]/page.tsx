@@ -5,7 +5,11 @@ import { Fragment, useEffect, useState } from "react";
 import { Course } from "@/type/Course";
 import Link from "next/link";
 
-const CourseList = ({ params }: { params: { action: string } }) => {
+const CourseList = ({
+	params,
+}: {
+	params: { action: string; school_id: string };
+}) => {
 	const [courses, setCourses] = useState<Course[]>([]);
 	const [courseFound, setCourseFound] = useState("loading");
 
@@ -32,7 +36,7 @@ const CourseList = ({ params }: { params: { action: string } }) => {
 				<h2 className="text-xl font-bold mb-4">Registered Courses</h2>
 				{params.action != "result" && (
 					<Link
-						href={`/course/add_new`}
+						href={`/course/add_new/${params.school_id}`}
 						className=" bg-blue-600 w-max h-max py-1 text-white font-bold text-center px-4 rounded">
 						Add Course
 					</Link>
@@ -55,7 +59,7 @@ const CourseList = ({ params }: { params: { action: string } }) => {
 						return (
 							<Fragment key={course._id}>
 								<Link
-									href={`/results/${course.course_code}`}
+									href={`/results/${params.school_id}/${course.course_code}`}
 									className=" my-1 w-[95%] sm:w-[60%] h-max block">
 									<li className="p-2 bg-white border cursor-pointer hover:bg-gray-100">
 										{course.name} ({course.course_code})

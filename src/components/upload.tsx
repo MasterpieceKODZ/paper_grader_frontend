@@ -21,13 +21,18 @@ async function fetchSavedExamAnswersStudent(
 		const svdStu = response.data.map((itm: any) => {
 			return { student_name: itm.student_name, student_id: itm.student_id };
 		});
+
+		console.log("====================== UPLOADED STUDENTS ================");
+
+		console.log(svdStu);
+
 		return svdStu;
 	} catch (error) {
 		return [];
 	}
 }
 
-const UploadPage = () => {
+const UploadPage = ({ schoolId }: { schoolId: any }) => {
 	const [courses, setCourses] = useState<Course[]>([]);
 	const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
 	const [examDate, setExamDate] = useState("");
@@ -47,24 +52,22 @@ const UploadPage = () => {
 
 	async function handleInitiateGrading(
 		school_name: string,
+		course_name: string,
 		course_code: string,
 		date: any,
 	) {
-		setMessage("grading in progress...");
-		setShowProceedBtn(false);
-		setLoading(false);
-		setShowPopup(true);
 		axios
 			.post("http://localhost:4000/grade-exam", {
 				school_name,
+				course_name,
 				course_code,
 				date,
 			})
 			.then((res) => {
-				router.push(`/results/${course_code}`);
+				router.push(`/results/${schoolId}/${course_code}`);
 			})
 			.catch((e) => {
-				setMessage("EXAM GRADING FAILED. ");
+				setMessage("UNABLE TO INITIATE GRADING.");
 				setShowProceedBtn(false);
 				setLoading(false);
 				setShowPopup(true);
@@ -212,8 +215,6 @@ const UploadPage = () => {
 									selectedCourse.course_code,
 									e.target.value,
 								).then((res) => {
-									console.log(res);
-
 									setStudentsUploaded(res);
 								});
 							}
@@ -235,7 +236,7 @@ const UploadPage = () => {
 					<input
 						type="text"
 						value={studentId}
-						onChange={(e) => setStudentId(e.target.value)}
+						onChange={(e) => setStudentId(e.target.value.toUpperCase())}
 						className="border p-2 rounded w-full"
 					/>
 				</div>
@@ -315,6 +316,7 @@ const UploadPage = () => {
 						if (selectedCourse != null && examDate != null) {
 							handleInitiateGrading(
 								selectedCourse.school_name,
+								selectedCourse.name,
 								selectedCourse.course_code,
 								examDate,
 							);

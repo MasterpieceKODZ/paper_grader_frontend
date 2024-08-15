@@ -1,25 +1,112 @@
-import Link from "next/link";
+"use client";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-const Homepage = () => {
+export default function Home() {
+	const [schoolName, setSchoolName] = useState("");
+	const [schools, setSchools] = useState<any[]>([]);
+	const [loading, setLoading] = useState(false);
+	const [failed, setFailed] = useState(false);
+	const router = useRouter();
+
+	useEffect(() => {
+		updateSchools();
+	}, []);
+
+	async function updateSchools() {
+		try {
+			const schoolsResponse = await axios.get(
+				"http://localhost:4000/school/get-all",
+			);
+			setSchools(schoolsResponse.data);
+		} catch (error) {
+			setSchools([]);
+		}
+	}
+
+	async function handleAddSchool(schoolName: string) {
+		setLoading(true);
+
+		try {
+			await axios.post(
+				"http://localhost:4000/school/add-new",
+				{ schoolName },
+				{
+					headers: {
+						"Content-Type": "application/json",
+					},
+				},
+			);
+			await updateSchools();
+		} catch (error) {
+			setLoading(false);
+			setFailed(true);
+			setTimeout(() => {
+				setFailed(false);
+			}, 2000);
+		}
+		setLoading(false);
+	}
 	return (
-		<div className=" w-[100%] min-h-[80vh] flex justify-center items-center">
-			<Link
-				href="/course/list/view"
-				className=" w-max h-max px-3 py-2 rounded-md font-bold text-white text-center bg-blue-600 mr-5">
-				COURSES
-			</Link>
-			<Link
-				href="/upload"
-				className=" w-max h-max px-3 py-2 rounded-md font-bold text-white text-center bg-blue-600 mr-2 ml-2">
-				UPLOAD ANSWERS
-			</Link>
-			<Link
-				href="/course/list/result"
-				className=" w-max h-max px-3 py-2 rounded-md font-bold text-white text-center bg-blue-600 ml-5">
-				VIEW RESULT
-			</Link>
-		</div>
+		<main className="min-h-screen w-screen">
+			<div className=" w-screen min-h-max py-5 px-5">
+				<div className="min-w-[100%]">
+					<div className="p-8 sm:w-[80%] sm:max-w-[650px] block mx-auto">
+						<div className="mb-4">
+							<h2 className="text-xl text-center font-bold">Add School</h2>
+							<input
+								type="text"
+								placeholder="School Name"
+								value={schoolName}
+								onChange={(e) => {
+									// update saved students list
+									setSchoolName(e.target.value);
+								}}
+								className="border p-2 rounded w-full mt-8"
+							/>
+							{loading ? (
+								<button
+									type="button"
+									className="bg-green-500 text-white px-4 py-1 rounded mt-4">
+									Processing...
+								</button>
+							) : (
+								<button
+									type="button"
+									onClick={() => {
+										handleAddSchool(schoolName);
+									}} // Replace with actual function
+									className="bg-blue-500 text-white px-4 py-1 rounded mt-4">
+									Save
+								</button>
+							)}
+							{failed && (
+								<p className=" font-mono text-left text-red-500 mt-3 ">
+									school registration failed.
+								</p>
+							)}
+						</div>
+					</div>
+					{schools.length > 0 && (
+						<div className="p-8 sm:w-[80%] sm:max-w-[650px] block mx-auto">
+							<h2 className="text-xl text-center font-bold mb-4">
+								Select School
+							</h2>
+							<ul className="space-y-2 mt-12">
+								{schools.map((sch) => (
+									<li
+										key={sch._id}
+										className="p-2 bg-white border cursor-pointer hover:bg-gray-100"
+										onClick={() => router.push(`/dashboard/${sch._id}`)}>
+										{sch.school_name}
+									</li>
+								))}
+							</ul>
+						</div>
+					)}
+				</div>
+			</div>
+		</main>
 	);
-};
-
-export default Homepage;
+}
