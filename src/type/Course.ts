@@ -1,6 +1,6 @@
 export type Course = {
 	_id?: string;
-	school_name: string;
+	school_id: string;
 	name: string;
 	course_code: string;
 	objective_question_and_answer: {
@@ -11,7 +11,7 @@ export type Course = {
 			question: String;
 			rubric: String;
 			context: [String];
-			marks: number;
+			mark: number;
 		};
 	};
 };

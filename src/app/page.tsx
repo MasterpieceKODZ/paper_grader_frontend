@@ -4,17 +4,17 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function Home() {
-	const [schoolName, setSchoolName] = useState("");
+	const [StSchoolName, setSchoolName] = useState("");
 	const [schools, setSchools] = useState<any[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [failed, setFailed] = useState(false);
 	const router = useRouter();
 
 	useEffect(() => {
-		updateSchools();
+		updateSchoolsState();
 	}, []);
 
-	async function updateSchools() {
+	async function updateSchoolsState() {
 		try {
 			const schoolsResponse = await axios.get(
 				"http://localhost:4000/school/get-all",
@@ -25,7 +25,7 @@ export default function Home() {
 		}
 	}
 
-	async function handleAddSchool(schoolName: string) {
+	async function handleSaveSchoolToDB(schoolName: string) {
 		setLoading(true);
 
 		try {
@@ -38,7 +38,7 @@ export default function Home() {
 					},
 				},
 			);
-			await updateSchools();
+			await updateSchoolsState();
 		} catch (error) {
 			setLoading(false);
 			setFailed(true);
@@ -58,7 +58,7 @@ export default function Home() {
 							<input
 								type="text"
 								placeholder="School Name"
-								value={schoolName}
+								value={StSchoolName}
 								onChange={(e) => {
 									// update saved students list
 									setSchoolName(e.target.value);
@@ -75,7 +75,7 @@ export default function Home() {
 								<button
 									type="button"
 									onClick={() => {
-										handleAddSchool(schoolName);
+										handleSaveSchoolToDB(StSchoolName);
 									}} // Replace with actual function
 									className="bg-blue-500 text-white px-4 py-1 rounded mt-4">
 									Save

@@ -6,27 +6,23 @@ import axios from "axios";
 import { Course } from "@/type/Course";
 import { useRouter } from "next/navigation";
 
-async function fetchSavedExamAnswersStudent(
-	school_name: string,
+async function fetchUploadedExamCandidates(
+	school_id: string,
 	course_code: string,
 	date: string,
 ) {
 	try {
 		const response = await axios.post("http://localhost:4000/exam-answers", {
-			school_name,
+			school_id,
 			course_code,
 			date,
 		});
 
-		const svdStu = response.data.map((itm: any) => {
+		const listUploadedStudent = response.data.map((itm: any) => {
 			return { student_name: itm.student_name, student_id: itm.student_id };
 		});
 
-		console.log("====================== UPLOADED STUDENTS ================");
-
-		console.log(svdStu);
-
-		return svdStu;
+		return listUploadedStudent;
 	} catch (error) {
 		return [];
 	}
@@ -48,23 +44,23 @@ const UploadPage = ({ schoolId }: { schoolId: any }) => {
 	);
 	const [loading, setLoading] = useState(false);
 
-	const router = useRouter();
+	const pageRouter = useRouter();
 
 	async function handleInitiateGrading(
-		school_name: string,
+		school_id: string,
 		course_name: string,
 		course_code: string,
 		date: any,
 	) {
 		axios
 			.post("http://localhost:4000/grade-exam", {
-				school_name,
+				school_id,
 				course_name,
 				course_code,
 				date,
 			})
 			.then((res) => {
-				router.push(`/results/${schoolId}/${course_code}`);
+				pageRouter.push(`/results/${schoolId}/${course_code}`);
 			})
 			.catch((e) => {
 				setMessage("UNABLE TO INITIATE GRADING.");
@@ -90,7 +86,7 @@ const UploadPage = ({ schoolId }: { schoolId: any }) => {
 		theoryFileInp.value = "";
 	};
 
-	const handleUpload = async () => {
+	const handleStudentAnswerUpload = async () => {
 		setShowPopup(false);
 		setLoading(true);
 		if (
@@ -109,7 +105,7 @@ const UploadPage = ({ schoolId }: { schoolId: any }) => {
 		}
 
 		const formData = new FormData();
-		formData.append("school_name", selectedCourse.school_name);
+		formData.append("school_id", selectedCourse.school_id);
 		formData.append("course_name", selectedCourse.name);
 		formData.append("course_code", selectedCourse.course_code);
 		formData.append("date", examDate);
@@ -133,12 +129,12 @@ const UploadPage = ({ schoolId }: { schoolId: any }) => {
 			setStudentName("");
 			resetFileInputs();
 
-			const savedStudent = await fetchSavedExamAnswersStudent(
-				selectedCourse.school_name,
+			const uploadedCandidates = await fetchUploadedExamCandidates(
+				selectedCourse.school_id,
 				selectedCourse.course_code,
 				examDate,
 			);
-			setStudentsUploaded(savedStudent);
+			setStudentsUploaded(uploadedCandidates);
 		} catch (error) {
 			setMessage("Upload failed, please try again.");
 			setShowProceedBtn(false);
@@ -180,8 +176,8 @@ const UploadPage = ({ schoolId }: { schoolId: any }) => {
 
 							setTimeout(() => {
 								if (examDate && selectCourse) {
-									fetchSavedExamAnswersStudent(
-										selectCourse.school_name,
+									fetchUploadedExamCandidates(
+										selectCourse.school_id,
 										selectCourse.course_code,
 										examDate,
 									).then((res) => setStudentsUploaded(res));
@@ -210,8 +206,8 @@ const UploadPage = ({ schoolId }: { schoolId: any }) => {
 
 							setExamDate(e.target.value);
 							if (selectedCourse?.course_code) {
-								fetchSavedExamAnswersStudent(
-									selectedCourse.school_name,
+								fetchUploadedExamCandidates(
+									selectedCourse.school_id,
 									selectedCourse.course_code,
 									e.target.value,
 								).then((res) => {
@@ -287,7 +283,7 @@ const UploadPage = ({ schoolId }: { schoolId: any }) => {
 							</button>
 							{showProceedBtn && (
 								<button
-									onClick={handleUpload}
+									onClick={handleStudentAnswerUpload}
 									className="bg-green-500 text-white px-4 py-1 ms-5 rounded">
 									Proceed
 								</button>
@@ -315,7 +311,7 @@ const UploadPage = ({ schoolId }: { schoolId: any }) => {
 					onClick={() => {
 						if (selectedCourse != null && examDate != null) {
 							handleInitiateGrading(
-								selectedCourse.school_name,
+								selectedCourse.school_id,
 								selectedCourse.name,
 								selectedCourse.course_code,
 								examDate,

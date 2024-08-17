@@ -16,10 +16,10 @@ const CourseList = ({
 	const API_URL = "http://localhost:4000/course"; // External API URL
 
 	useEffect(() => {
-		fetchCourses();
+		updateCoursesState();
 	}, []);
 
-	const fetchCourses = async () => {
+	const updateCoursesState = async () => {
 		try {
 			const response = await axios.get(API_URL);
 			setCourses(response.data);

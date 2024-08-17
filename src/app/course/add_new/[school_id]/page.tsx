@@ -10,7 +10,7 @@ const AddCourse = ({ params }: { params: { school_id: string } }) => {
 
 	const API_URL = "http://localhost:4000/course"; // External API URL
 
-	const router = useRouter();
+	const pageRouter = useRouter();
 
 	const handleFormSubmit = async (course: any) => {
 		setLoading(true);
@@ -19,7 +19,7 @@ const AddCourse = ({ params }: { params: { school_id: string } }) => {
 			const res = await axios.post(API_URL, course);
 
 			if (res.statusText == "Created") {
-				router.push(`/course/list/${params.school_id}/view`);
+				pageRouter.push(`/course/list/${params.school_id}/view`);
 			}
 		} catch (error) {
 			console.error("Error saving course", error);

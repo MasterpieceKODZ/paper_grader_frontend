@@ -3,16 +3,16 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 
 interface ExamData {
-	school_name: string;
+	school_id: string;
 	course_name: string;
 	course_code: string;
 	date: Date;
 	grading_status: "in-progress" | "done" | "none";
-	answers: {
+	candidates: {
 		student_name: string;
 		student_id: string;
 		objective_answers: {};
-		objective_mark: number;
+		objective_score: number;
 		theory_answers: [];
 		theory_grade_summary: [
 			{
@@ -22,7 +22,7 @@ interface ExamData {
 				reason: string;
 			},
 		];
-		theory_grade_mark: number;
+		theory_score: number;
 	}[];
 }
 
@@ -50,10 +50,6 @@ const Results = ({
 			})
 			.then((res) => {
 				setError(null);
-				console.log(
-					"======================== exam result 1st ====================",
-				);
-				console.log(res.data);
 
 				if (res.data.grading_status == "in-progress") {
 					const intervalId = setInterval(() => {
@@ -123,7 +119,7 @@ const Results = ({
 			)}
 			{examData != null &&
 			examData.grading_status == "done" &&
-			examData.answers.length > 0 ? (
+			examData.candidates.length > 0 ? (
 				<h2 className=" text-center text-gray-500 font-serif text-2xl font-light">
 					<span>{examData.course_name}</span>
 					<span> - {examData.course_code} Results</span>
@@ -134,7 +130,7 @@ const Results = ({
 
 			{examData != null &&
 			examData.grading_status == "done" &&
-			examData.answers.length > 0 ? (
+			examData.candidates.length > 0 ? (
 				<table className=" block mx-auto w-max mt-14">
 					<thead>
 						<tr>
@@ -146,7 +142,7 @@ const Results = ({
 						</tr>
 					</thead>
 					<tbody>
-						{examData.answers.map((result) => (
+						{examData.candidates.map((result) => (
 							<tr key={result.student_id}>
 								<td className=" px-2">{result.student_id}</td>
 								<td
@@ -158,10 +154,10 @@ const Results = ({
 									}}>
 									{result.student_name}
 								</td>
-								<td className=" px-2">{result.objective_mark}</td>
-								<td className=" px-2">{result.theory_grade_mark}</td>
+								<td className=" px-2">{result.objective_score}</td>
+								<td className=" px-2">{result.theory_score}</td>
 								<td className=" px-2">
-									{result.theory_grade_mark + result.objective_mark}
+									{result.theory_score + result.objective_score}
 								</td>
 							</tr>
 						))}
