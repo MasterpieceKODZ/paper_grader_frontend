@@ -87,14 +87,7 @@ const UploadPage = ({ schoolId }: { schoolId: any }) => {
 	const handleStudentAnswerUpload = async () => {
 		setShowPopup(false);
 		setLoading(true);
-		if (
-			!selectedCourse ||
-			!examDate ||
-			!studentName ||
-			!studentId ||
-			!objectiveFile ||
-			!theoryFiles
-		) {
+		if (!selectedCourse || !examDate || !studentName || !studentId) {
 			setMessage("Please fill all fields and provide all necessary files.");
 			setShowProceedBtn(false);
 			setLoading(false);
@@ -109,10 +102,15 @@ const UploadPage = ({ schoolId }: { schoolId: any }) => {
 		formData.append("date", examDate);
 		formData.append("student_name", studentName);
 		formData.append("student_id", studentId);
-		formData.append("objective_answers", objectiveFile);
-		Array.from(theoryFiles).forEach((file) =>
-			formData.append("theory_answers", file),
-		);
+		formData.append("objective_answers", objectiveFile ?? "");
+
+		if (theoryFiles) {
+			Array.from(theoryFiles).forEach((file) =>
+				formData.append("theory_answers", file),
+			);
+		} else {
+			formData.append("theory_answers", "");
+		}
 
 		try {
 			await axios.post("http://localhost:4000/upload-answers", formData, {
