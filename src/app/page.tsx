@@ -60,7 +60,6 @@ export default function Home() {
 								placeholder="School Name"
 								value={StSchoolName}
 								onChange={(e) => {
-									// update saved students list
 									setSchoolName(e.target.value);
 								}}
 								className="border p-2 rounded w-full mt-8"

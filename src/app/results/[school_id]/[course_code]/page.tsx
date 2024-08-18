@@ -53,7 +53,6 @@ const Results = ({
 
 				if (res.data.grading_status == "in-progress") {
 					const intervalId = setInterval(() => {
-						console.log(intervalCount);
 
 						axios
 							.post("http://localhost:4000/results", {

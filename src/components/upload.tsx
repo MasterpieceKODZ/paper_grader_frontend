@@ -1,6 +1,4 @@
 "use client";
-
-// pages/upload.tsx
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Course } from "@/type/Course";
@@ -202,8 +200,6 @@ const UploadPage = ({ schoolId }: { schoolId: any }) => {
 						type="date"
 						value={examDate}
 						onChange={(e) => {
-							// update saved students list
-
 							setExamDate(e.target.value);
 							if (selectedCourse?.course_code) {
 								fetchUploadedExamCandidates(
@@ -322,7 +318,7 @@ const UploadPage = ({ schoolId }: { schoolId: any }) => {
 							setLoading(false);
 							setShowPopup(true);
 						}
-					}} // Replace with actual function
+					}}
 					className="bg-red-500 text-white p-2 rounded mt-4">
 					Initiate Grading
 				</button>

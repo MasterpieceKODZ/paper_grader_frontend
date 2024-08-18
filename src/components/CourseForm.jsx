@@ -152,9 +152,10 @@ const CourseForm = ({ schoolId, onSubmit, loading }) => {
 										<div className="space-y-2 mt-10">
 											{/* theory question */}
 											<div className="flex space-x-2 items-center mt-3">
-												<input
+												<textarea
 													type="text"
 													className="mt-1 block w-full border border-gray-300 p-2"
+													rows={3}
 													placeholder="Question"
 													value={item.question}
 													onChange={(e) =>
