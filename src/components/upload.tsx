@@ -144,7 +144,15 @@ const UploadPage = ({ schoolId }: { schoolId: any }) => {
 
 	useEffect(() => {
 		axios
-			.get("http://localhost:4000/course")
+			.post(
+				"http://localhost:4000/course/get-all-by-school",
+				{ school_id: schoolId },
+				{
+					headers: {
+						"Content-Type": "application/json",
+					},
+				},
+			)
 			.then((response) => setCourses(response.data))
 			.catch((e) => {
 				setCourses([]);

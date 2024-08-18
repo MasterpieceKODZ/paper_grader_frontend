@@ -13,7 +13,7 @@ const CourseList = ({
 	const [courses, setCourses] = useState<Course[]>([]);
 	const [courseFound, setCourseFound] = useState("loading");
 
-	const API_URL = "http://localhost:4000/course"; // External API URL
+	const API_URL = "http://localhost:4000/course/get-all-by-school"; // External API URL
 
 	useEffect(() => {
 		updateCoursesState();
@@ -21,7 +21,15 @@ const CourseList = ({
 
 	const updateCoursesState = async () => {
 		try {
-			const response = await axios.get(API_URL);
+			const response = await axios.post(
+				API_URL,
+				{ school_id: params.school_id },
+				{
+					headers: {
+						"Content-Type": "application/json",
+					},
+				},
+			);
 			setCourses(response.data);
 			if (response.data.length > 0) setCourseFound("yes");
 			else setCourseFound("no");
