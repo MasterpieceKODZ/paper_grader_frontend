@@ -53,12 +53,14 @@ const Results = ({
 
 				if (res.data.grading_status == "in-progress") {
 					const intervalId = setInterval(() => {
+						let errorTimeOut: any;
 						axios
 							.post("http://localhost:4000/results", {
 								schoolId: params.school_id,
 								courseCode: params.course_code,
 							})
 							.then((intRes) => {
+								clearTimeout(errorTimeOut);
 								setError(null);
 								if (intRes.data.grading_status == "done") {
 									setExamData(intRes.data);
@@ -67,6 +69,7 @@ const Results = ({
 								}
 							})
 							.catch((error) => {
+								clearTimeout(errorTimeOut);
 								console.error("Error fetching results:", error);
 								setError("Failed to load results. refresh page to try again");
 								setLoading(false);
@@ -75,14 +78,15 @@ const Results = ({
 
 						intervalCount++;
 
-						setTimeout(() => {
-							setLoading(false);
-							if (!examData) {
-								setError(
-									"Unable to fectch results, refresh this page to try again.",
-								);
-							}
-						}, 120000);
+						if (!errorTimeOut)
+							errorTimeOut = setTimeout(() => {
+								setLoading(false);
+								if (!examData) {
+									setError(
+										"Unable to fectch results, refresh this page to try again.",
+									);
+								}
+							}, 120000);
 					}, 1000);
 				} else {
 					setExamData(res.data);
