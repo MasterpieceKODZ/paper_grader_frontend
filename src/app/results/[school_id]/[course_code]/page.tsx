@@ -32,7 +32,7 @@ const Results = ({
 	params: { school_id: string; course_code: string };
 }) => {
 	const [examData, setExamData] = useState<ExamData | null>(null);
-	const [loading, setLoading] = useState<boolean>(false);
+	const [loading, setLoading] = useState<boolean>(true);
 	const [error, setError] = useState<string | null>(null);
 	const [selectedStudentName, setSelectedStudentName] = useState("");
 	const [theorySummary, setTheorySummary] = useState<any[]>([]);
