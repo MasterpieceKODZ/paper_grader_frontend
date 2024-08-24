@@ -51,7 +51,7 @@ const UploadPage = ({ schoolId }: { schoolId: any }) => {
 		school_id: string,
 		course_name: string,
 		course_code: string,
-		date: any,
+		date: string,
 	) {
 		axios
 			.post("http://localhost:4000/grade-exam", {

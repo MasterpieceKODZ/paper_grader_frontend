@@ -59,6 +59,7 @@ const Results = ({
 							.post("http://localhost:4000/results", {
 								schoolId: params.school_id,
 								courseCode: params.course_code,
+								date: params.date,
 							})
 							.then((intRes) => {
 								clearTimeout(errorTimeOut);

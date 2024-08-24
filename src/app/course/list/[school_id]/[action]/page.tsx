@@ -4,6 +4,7 @@ import axios from "axios";
 import { Fragment, useEffect, useState } from "react";
 import { Course } from "@/type/Course";
 import Link from "next/link";
+import { headers } from "next/headers";
 
 function formatDate(dateString: string): string {
 	const date = new Date(dateString);
