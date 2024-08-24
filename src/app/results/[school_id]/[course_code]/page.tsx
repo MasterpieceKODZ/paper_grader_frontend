@@ -52,6 +52,8 @@ const Results = ({
 				setError(null);
 
 				if (res.data.grading_status == "in-progress") {
+					setExamData(res.data);
+					setLoading(false);
 					const intervalId = setInterval(() => {
 						let errorTimeOut: any;
 						axios
@@ -96,9 +98,6 @@ const Results = ({
 			.catch((error) => {
 				console.error("Error fetching results:", error);
 				setError("Failed to load results. refresh page to try again");
-				setLoading(false);
-			})
-			.finally(() => {
 				setLoading(false);
 			});
 	}, []);
