@@ -29,7 +29,7 @@ interface ExamData {
 const Results = ({
 	params,
 }: {
-	params: { school_id: string; course_code: string };
+	params: { school_id: string; course_code: string; date: string };
 }) => {
 	const [examData, setExamData] = useState<ExamData | null>(null);
 	const [loading, setLoading] = useState<boolean>(true);
@@ -38,8 +38,6 @@ const Results = ({
 	const [theorySummary, setTheorySummary] = useState<any[]>([]);
 	const [showTheorySummary, setShowTheorySummary] = useState(false);
 
-	let intervalCount = 1;
-
 	useEffect(() => {
 		setLoading(true);
 
@@ -47,6 +45,7 @@ const Results = ({
 			.post("http://localhost:4000/results", {
 				schoolId: params.school_id,
 				courseCode: params.course_code,
+				date: params.date,
 			})
 			.then((res) => {
 				setError(null);
@@ -77,8 +76,6 @@ const Results = ({
 								setLoading(false);
 								clearInterval(intervalId);
 							});
-
-						intervalCount++;
 
 						if (!errorTimeOut)
 							errorTimeOut = setTimeout(() => {

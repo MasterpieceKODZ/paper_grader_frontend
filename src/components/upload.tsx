@@ -10,11 +10,14 @@ async function fetchUploadedExamCandidates(
 	date: string,
 ) {
 	try {
-		const response = await axios.post("http://localhost:4000/exam-answers", {
-			school_id,
-			course_code,
-			date,
-		});
+		const response = await axios.post(
+			"http://localhost:4000/uploaded-exam-answers",
+			{
+				school_id,
+				course_code,
+				date,
+			},
+		);
 
 		const listUploadedStudent = response.data.map((itm: any) => {
 			return { student_name: itm.student_name, student_id: itm.student_id };
@@ -58,7 +61,7 @@ const UploadPage = ({ schoolId }: { schoolId: any }) => {
 				date,
 			})
 			.then((res) => {
-				pageRouter.push(`/results/${schoolId}/${course_code}`);
+				pageRouter.push(`/results/${schoolId}/${course_code}/${date}`);
 			})
 			.catch((e) => {
 				setMessage("UNABLE TO INITIATE GRADING.");
@@ -209,7 +212,7 @@ const UploadPage = ({ schoolId }: { schoolId: any }) => {
 							setExamDate(e.target.value);
 							if (selectedCourse?.course_code) {
 								fetchUploadedExamCandidates(
-									selectedCourse.school_id,
+									schoolId,
 									selectedCourse.course_code,
 									e.target.value,
 								).then((res) => {
@@ -313,7 +316,7 @@ const UploadPage = ({ schoolId }: { schoolId: any }) => {
 					onClick={() => {
 						if (selectedCourse != null && examDate != null) {
 							handleInitiateGrading(
-								selectedCourse.school_id,
+								schoolId,
 								selectedCourse.name,
 								selectedCourse.course_code,
 								examDate,
