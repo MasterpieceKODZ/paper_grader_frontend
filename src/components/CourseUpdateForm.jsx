@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 
-const CourseForm = ({ schoolId, onSubmit, loading }) => {
+const CourseUpdateForm = ({ schoolId, courseId, onSubmit, loading }) => {
 	const [name, setName] = useState("");
 	const [courseCode, setCourseCode] = useState("");
 	const [objectiveQuestions, setObjectiveQuestions] = useState([]);
 	const [theoryQuestions, setTheoryQuestions] = useState([]);
-	const [isObjectiveEnabled, setIsObjectiveEnabled] = useState(false);
-	const [isTheoryEnabled, setIsTheoryEnabled] = useState(false);
+	const [isObjectiveEnabled, setIsObjectiveEnabled] = useState(true);
+	const [isTheoryEnabled, setIsTheoryEnabled] = useState(true);
 
 	const handleAddObjectiveQuestion = () => {
 		setObjectiveQuestions([
@@ -50,6 +51,42 @@ const CourseForm = ({ schoolId, onSubmit, loading }) => {
 
 		onSubmit(course);
 	};
+
+	function formatObjMapToArray(objMap) {
+		const objKeys = Object.keys(objMap);
+		const objValues = Object.values(objMap);
+
+		return objKeys.map((item, index) => {
+			return { question: item, answer: objValues[index] };
+		});
+	}
+
+	useEffect(() => {
+		axios
+			.post(`http://localhost:4000/course/get-by-id`, {
+				school_id: schoolId,
+				course_id: courseId,
+			})
+			.then((res) => {
+				if (res.data.name) {
+					setName(res.data.name);
+					setCourseCode(res.data.course_code);
+
+					setObjectiveQuestions(
+						formatObjMapToArray(res.data.objective_question_and_answer),
+					);
+
+					setTheoryQuestions(
+						Object.values(res.data.theory_question_and_answer),
+					);
+				}
+			})
+			.catch((err) => {
+				console.log(err);
+
+				console.log("get course by id failed...");
+			});
+	}, []);
 
 	return (
 		<div>
@@ -308,7 +345,7 @@ const CourseForm = ({ schoolId, onSubmit, loading }) => {
 						className="px-6 py-1 mt-5 bg-blue-500  text-white rounded"
 						disabled={loading}>
 						{" "}
-						Upload Course
+						Update Course
 					</button>
 					{loading && (
 						<div className="spinner text-green-500 my-4">
@@ -321,4 +358,4 @@ const CourseForm = ({ schoolId, onSubmit, loading }) => {
 	);
 };
 
-export default CourseForm;
+export default CourseUpdateForm;

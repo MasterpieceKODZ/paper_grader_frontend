@@ -2,25 +2,32 @@
 
 import axios from "axios";
 import { useState } from "react";
-import CourseForm from "@/components/CourseForm";
 import { useRouter } from "next/navigation";
+import CourseUpdateForm from "@/components/CourseUpdateForm";
 
-const AddCourse = ({ params }: { params: { school_id: string } }) => {
+const UpdateCourse = ({
+	params,
+}: {
+	params: { school_id: string; course_id: string };
+}) => {
 	const [loading, setLoading] = useState(false);
 
 	const pageRouter = useRouter();
 
-	const handleFormSubmit = async (course: any) => {
+	const handleFormSubmit: any = async (course: any) => {
 		setLoading(true);
 
 		try {
-			const res = await axios.post("http://localhost:4000/course", course);
+			const res = await axios.post(
+				`http://localhost:4000/course/update/${params.course_id}`,
+				course,
+			);
 
-			if (res.statusText == "Created") {
+			if (res.statusText == "OK") {
 				pageRouter.push(`/course/list/${params.school_id}/view`);
 			}
 		} catch (error) {
-			console.error("Error saving course", error);
+			console.error("Error updating course", error);
 		} finally {
 			setLoading(false);
 		}
@@ -30,8 +37,9 @@ const AddCourse = ({ params }: { params: { school_id: string } }) => {
 			<h2 className=" mt-4 text-center text-xl text-gray-700 font-bold">
 				Register Course
 			</h2>
-			<CourseForm
+			<CourseUpdateForm
 				schoolId={params.school_id}
+				courseId={params.course_id}
 				onSubmit={handleFormSubmit}
 				loading={loading}
 			/>
@@ -39,4 +47,4 @@ const AddCourse = ({ params }: { params: { school_id: string } }) => {
 	);
 };
 
-export default AddCourse;
+export default UpdateCourse;

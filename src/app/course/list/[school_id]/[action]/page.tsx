@@ -141,8 +141,13 @@ const CourseList = ({
 					return (
 						<li
 							key={course._id}
-							className="p-2 bg-white border cursor-pointer hover:bg-gray-100">
-							{course.name} ({course.course_code})
+							className="p-2 bg-white border hover:bg-gray-100">
+							<Link
+								className=" w-full h-full block"
+								passHref
+								href={`/course/update/${params.school_id}/${course._id}`}>
+								{course.name} ({course.course_code})
+							</Link>
 						</li>
 					);
 				})}
