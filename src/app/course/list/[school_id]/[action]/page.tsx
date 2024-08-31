@@ -76,13 +76,15 @@ const CourseList = ({
 		}
 	};
 
-	updateCoursesState();
-
 	useEffect(() => {
 		if (selectedCourseCode && examsByCourse.length < 1) {
 			fetchExamsByCourse();
 		}
 	}, [selectedCourseCode]);
+
+	useEffect(() => {
+		updateCoursesState();
+	}, []);
 
 	return (
 		<div className=" w-[95%] sm:max-w-[70%] block mx-auto">
