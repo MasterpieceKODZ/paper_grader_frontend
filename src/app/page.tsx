@@ -96,9 +96,29 @@ export default function Home() {
 								{schools.map((sch) => (
 									<li
 										key={sch._id}
-										className="p-2 bg-white border cursor-pointer hover:bg-gray-100"
-										onClick={() => router.push(`/dashboard/${sch._id}`)}>
-										{sch.school_name}
+										className="p-2 bg-white border flex w-full items-center justify-between">
+										<p
+											className=" cursor-pointer"
+											onClick={() => router.push(`/dashboard/${sch._id}`)}>
+											{sch.school_name}
+										</p>
+										<button
+											className=" text-red-600 font-mono"
+											onClick={() => {
+												axios
+													.post("http://localhost:4000/school/delete", {
+														id: sch._id,
+													})
+													.then((res) => {
+														updateSchoolsState();
+													})
+													.catch((err) => {
+														console.log("delete school error");
+														console.log(err);
+													});
+											}}>
+											del
+										</button>
 									</li>
 								))}
 							</ul>

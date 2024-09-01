@@ -143,13 +143,32 @@ const CourseList = ({
 					return (
 						<li
 							key={course._id}
-							className="p-2 bg-white border hover:bg-gray-100">
+							className="p-2 bg-white border flex items-center justify-between">
 							<Link
 								className=" w-full h-full block"
 								passHref
 								href={`/course/update/${params.school_id}/${course._id}`}>
 								{course.name} ({course.course_code})
 							</Link>
+							<button
+								className=" text-red-600 font-mono"
+								onClick={() => {
+									axios
+										.post("http://localhost:4000/course/delete", {
+											school_id: params.school_id,
+											course_code: course.course_code,
+											course_id: course._id,
+										})
+										.then((res) => {
+											updateCoursesState();
+										})
+										.catch((err) => {
+											console.log("delete school error");
+											console.log(err);
+										});
+								}}>
+								del
+							</button>
 						</li>
 					);
 				})}
